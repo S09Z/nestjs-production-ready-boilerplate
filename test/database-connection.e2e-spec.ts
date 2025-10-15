@@ -68,8 +68,9 @@ describe('Database Connection (e2e)', () => {
     });
 
     it('should handle multiple concurrent queries', async () => {
-      const queries = Array.from({ length: 5 }, (_, i) =>
-        databaseService.$queryRaw`SELECT ${i} as value`,
+      const queries = Array.from(
+        { length: 5 },
+        (_, i) => databaseService.$queryRaw`SELECT ${i} as value`,
       );
 
       await expect(Promise.all(queries)).resolves.not.toThrow();

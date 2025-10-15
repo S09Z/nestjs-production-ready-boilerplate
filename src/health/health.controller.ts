@@ -1,58 +1,50 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  HealthCheckService,
+  HttpHealthIndicator,
+  HealthCheck,
+  PrismaHealthIndicator,
+  MemoryHealthIndicator,
+  DiskHealthIndicator,
+} from '@nestjs/terminus';
 import { DatabaseService } from '../database/database.service';
 
-interface HealthCheckResponse {
-  status: string;
-  timestamp: string;
-  database: {
-    connected: boolean;
-    info?: {
-      host: string;
-      port: number;
-      database: string;
-      user: string;
-    };
-  };
-  uptime: number;
-}
-
-@ApiTags('health')
 @Controller('health')
 export class HealthController {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private health: HealthCheckService,
+    private http: HttpHealthIndicator,
+    private db: PrismaHealthIndicator,
+    private memory: MemoryHealthIndicator,
+    private disk: DiskHealthIndicator,
+    private databaseService: DatabaseService,
+  ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Health check endpoint' })
-  @ApiResponse({ status: 200, description: 'Service is healthy' })
-  @ApiResponse({ status: 503, description: 'Service is unhealthy' })
-  async check(): Promise<HealthCheckResponse> {
-    const isDatabaseConnected = await this.databaseService.checkConnection();
-
-    return {
-      status: isDatabaseConnected ? 'ok' : 'degraded',
-      timestamp: new Date().toISOString(),
-      database: {
-        connected: isDatabaseConnected,
-        info: isDatabaseConnected
-          ? this.databaseService.getDatabaseInfo()
-          : undefined,
-      },
-      uptime: process.uptime(),
-    };
+  @HealthCheck()
+  check() {
+    return this.health.check([
+      () => this.db.pingCheck('database', this.databaseService),
+      () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
+      () => this.memory.checkRSS('memory_rss', 150 * 1024 * 1024),
+      () =>
+        this.disk.checkStorage('storage', {
+          path: '/',
+          thresholdPercent: 0.9,
+        }),
+    ]);
   }
 
-  @Get('database')
-  @ApiOperation({ summary: 'Database health check' })
-  @ApiResponse({ status: 200, description: 'Database is connected' })
-  @ApiResponse({ status: 503, description: 'Database is disconnected' })
-  async checkDatabase() {
-    const isConnected = await this.databaseService.checkConnection();
+  @Get('ready')
+  @HealthCheck()
+  ready() {
+    return this.health.check([
+      () => this.db.pingCheck('database', this.databaseService),
+    ]);
+  }
 
-    return {
-      status: isConnected ? 'connected' : 'disconnected',
-      timestamp: new Date().toISOString(),
-      info: isConnected ? this.databaseService.getDatabaseInfo() : undefined,
-    };
+  @Get('live')
+  live() {
+    return { status: 'ok' };
   }
 }
