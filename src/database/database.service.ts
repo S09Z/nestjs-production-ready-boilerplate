@@ -89,7 +89,12 @@ export class DatabaseService
    * Helper method for transactions
    */
   async executeTransaction<T>(
-    fn: (prisma: PrismaClient) => Promise<T>,
+    fn: (
+      prisma: Omit<
+        PrismaClient,
+        '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+      >,
+    ) => Promise<T>,
   ): Promise<T> {
     return this.$transaction(fn);
   }

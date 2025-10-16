@@ -1,0 +1,77 @@
+# Auto-labeling configuration for Pull Requests
+
+# Documentation changes
+'documentation':
+  - changed-files:
+      - any-glob-to-any-file: ['**/*.md', 'docs/**/*']
+
+# Configuration changes
+'config':
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.json'
+          - '**/*.yml'
+          - '**/*.yaml'
+          - '.env.example'
+          - 'tsconfig*.json'
+
+# Dependencies
+'dependencies':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'pnpm-lock.yaml'
+
+# Database
+'database':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'prisma/**/*'
+          - 'src/database/**/*'
+
+# API
+'api':
+  - changed-files:
+      - any-glob-to-any-file: 'src/**/*.controller.ts'
+
+# Services
+'services':
+  - changed-files:
+      - any-glob-to-any-file: 'src/**/*.service.ts'
+
+# Tests
+'tests':
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.spec.ts'
+          - 'test/**/*'
+
+# CI/CD
+'ci-cd':
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**/*'
+          - 'Dockerfile'
+          - 'docker-compose*.yml'
+
+# DTOs
+'dto':
+  - changed-files:
+      - any-glob-to-any-file: '**/dto/*.ts'
+
+# Health & Monitoring
+'health':
+  - changed-files:
+      - any-glob-to-any-file: 'src/health/**/*'
+
+# Security
+'security':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/common/filters/**/*'
+          - 'src/common/guards/**/*'
+
+# Cache
+'cache':
+  - changed-files:
+      - any-glob-to-any-file: 'src/cache/**/*'

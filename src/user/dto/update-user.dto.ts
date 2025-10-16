@@ -10,5 +10,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   })
   @IsString()
   @IsOptional()
-  name?: string;
+  override name?: string;
 }
