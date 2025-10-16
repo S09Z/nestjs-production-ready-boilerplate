@@ -40,12 +40,22 @@ jobs:
 
       - name: Generate Prisma Client
         run: pnpm run prisma:generate
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/db
 
       - name: Build application
         run: pnpm run build
 
       - name: Run tests
         run: pnpm run test
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/db
+          NODE_ENV: test
+          PORT: 3000
+          JWT_SECRET: test-secret-key
+          JWT_EXPIRES_IN: 1h
+          THROTTLE_TTL: 60000
+          THROTTLE_LIMIT: 100
 
       - name: Generate changelog
         id: changelog
@@ -117,6 +127,8 @@ jobs:
 
       - name: Generate Prisma Client
         run: pnpm run prisma:generate
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/db
 
       - name: Build
         run: pnpm run build
