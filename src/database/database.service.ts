@@ -1,9 +1,20 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaClient } from '../../generated/prisma';
+import { PrismaClient, Prisma } from '../../generated/prisma';
 
 @Injectable()
-export class DatabaseService extends PrismaClient implements OnModuleInit {
+export class DatabaseService
+  extends PrismaClient<
+    Prisma.PrismaClientOptions,
+    'query' | 'error' | 'info' | 'warn'
+  >
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(DatabaseService.name);
 
   constructor(private configService: ConfigService) {
@@ -13,9 +24,25 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
           url: DatabaseService.buildDatabaseUrl(configService),
         },
       },
-      log: configService.get('database.logging')
-        ? ['query', 'info', 'warn', 'error']
-        : ['error'],
+      log: [
+        { emit: 'event', level: 'query' },
+        { emit: 'event', level: 'error' },
+        { emit: 'event', level: 'info' },
+        { emit: 'event', level: 'warn' },
+      ],
+      errorFormat: 'pretty',
+    });
+
+    // Log queries in development
+    if (configService.get('app.nodeEnv') === 'development') {
+      this.$on('query', (e) => {
+        this.logger.debug(`Query: ${e.query}`);
+        this.logger.debug(`Duration: ${e.duration}ms`);
+      });
+    }
+
+    this.$on('error', (e) => {
+      this.logger.error(e);
     });
   }
 
@@ -59,6 +86,24 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
   }
 
   /**
+   * Helper method for transactions
+   */
+  async executeTransaction<T>(
+    fn: (prisma: PrismaClient) => Promise<T>,
+  ): Promise<T> {
+    return this.$transaction(fn);
+  }
+
+  /**
+   * Graceful shutdown
+   */
+  enableShutdownHooks(app: { close: () => Promise<void> }) {
+    this.$on('beforeExit' as never, () => {
+      app.close();
+    });
+  }
+
+  /**
    * Build database URL from config
    */
   private static buildDatabaseUrl(configService: ConfigService): string {
@@ -68,6 +113,9 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
     const password = configService.get('database.password');
     const database = configService.get('database.name');
 
-    return `postgresql://${username}:${password}@${host}:${port}/${database}`;
+    // URL-encode password to handle special characters
+    const encodedPassword = encodeURIComponent(password || '');
+
+    return `postgresql://${username}:${encodedPassword}@${host}:${port}/${database}`;
   }
 }
