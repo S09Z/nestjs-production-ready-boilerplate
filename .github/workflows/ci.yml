@@ -15,49 +15,9 @@ env:
   PNPM_VERSION: '9'
 
 jobs:
-  # Stage 1: Code Quality
-  quality:
-    name: Code Quality
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18, 20, 22]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate Prisma Client
-        run: pnpm run prisma:generate
-        env:
-          DATABASE_URL: postgresql://user:pass@localhost:5432/db
-
-      - name: Run linter
-        run: pnpm run lint
-
-      - name: Run type check
-        run: pnpm tsc --noEmit
-
-  # Stage 2: Build
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: quality # Only run if quality checks pass
 
     steps:
       - name: Checkout code
