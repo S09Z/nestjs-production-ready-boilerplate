@@ -7,4 +7,5 @@ export default registerAs('app', () => ({
   corsOrigins: process.env.CORS_ORIGINS?.split(',') || [
     'http://localhost:3000',
   ],
+  maxBodySize: process.env.MAX_BODY_SIZE || '10mb',
 }));

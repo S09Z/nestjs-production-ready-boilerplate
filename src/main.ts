@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import compression from 'compression';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,6 +13,11 @@ async function bootstrap() {
 
   // Security
   app.use(helmet());
+
+  // Body size limits - protect against large payload attacks
+  const maxBodySize = configService.get('app.maxBodySize', '10mb');
+  app.use(express.json({ limit: maxBodySize }));
+  app.use(express.urlencoded({ extended: true, limit: maxBodySize }));
 
   // CORS
   app.enableCors({

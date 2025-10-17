@@ -7,6 +7,7 @@ export const envValidationSchema = Joi.object({
     .default('development'),
   PORT: Joi.number().default(3000),
   API_PREFIX: Joi.string().default('api'),
+  MAX_BODY_SIZE: Joi.string().default('10mb'),
 
   // CORS
   CORS_ORIGINS: Joi.string().optional(),
