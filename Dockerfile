@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for NestJS Production
 
 # Stage 1: Dependencies
-FROM node:18-alpine AS deps
+FROM node:20-alpine AS deps
 WORKDIR /app
 
 # Install pnpm
@@ -14,7 +14,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --prod=false
 
 # Stage 2: Build
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install pnpm
@@ -26,8 +26,8 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
-# Generate Prisma Client
-RUN pnpm run prisma:generate
+# Generate Prisma Client (skip merge step, use existing schema.prisma)
+RUN npx prisma generate
 
 # Build application
 RUN pnpm run build
@@ -36,7 +36,7 @@ RUN pnpm run build
 RUN pnpm install --frozen-lockfile --prod
 
 # Stage 3: Production
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Install dumb-init for proper signal handling

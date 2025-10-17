@@ -19,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
+import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -32,6 +33,7 @@ import {
 @ApiBearerAuth()
 @Controller('users')
 export class UserController {
+  constructor(private readonly userService: UserService) {}
   @Get()
   @ApiOperation({
     summary: 'Get all users',
@@ -49,9 +51,8 @@ export class UserController {
     description: 'Unauthorized',
     type: ErrorResponseDto,
   })
-  findAll(@Query() _pagination: PaginationDto): UserResponseDto[] {
-    // TODO: Implement pagination logic
-    return [];
+  async findAll(@Query() pagination: PaginationDto) {
+    return this.userService.findAll(pagination);
   }
 
   @Get(':id')
@@ -79,9 +80,8 @@ export class UserController {
     description: 'Unauthorized',
     type: ErrorResponseDto,
   })
-  findOne(@Param('id') _id: string): UserResponseDto {
-    // TODO: Implement user retrieval logic
-    return {} as UserResponseDto;
+  async findOne(@Param('id') id: string): Promise<UserResponseDto> {
+    return this.userService.findOne(id);
   }
 
   @Post()
@@ -105,9 +105,8 @@ export class UserController {
     description: 'User with this email already exists',
     type: ErrorResponseDto,
   })
-  create(@Body() _createUserDto: CreateUserDto): UserResponseDto {
-    // TODO: Implement user creation logic
-    return {} as UserResponseDto;
+  async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    return this.userService.create(createUserDto);
   }
 
   @Put(':id')
@@ -141,12 +140,11 @@ export class UserController {
     description: 'Unauthorized',
     type: ErrorResponseDto,
   })
-  update(
-    @Param('id') _id: string,
-    @Body() _updateUserDto: UpdateUserDto,
-  ): UserResponseDto {
-    // TODO: Implement user update logic
-    return {} as UserResponseDto;
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
+    return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
@@ -174,7 +172,7 @@ export class UserController {
     description: 'Unauthorized',
     type: ErrorResponseDto,
   })
-  remove(@Param('id') _id: string): void {
-    // TODO: Implement user deletion logic
+  async remove(@Param('id') id: string): Promise<void> {
+    return this.userService.remove(id);
   }
 }

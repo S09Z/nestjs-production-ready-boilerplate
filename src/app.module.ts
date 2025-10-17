@@ -13,6 +13,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     }),
     DatabaseModule,
     HealthModule,
+    PostModule,
   ],
   controllers: [AppController, UserController],
   providers: [

@@ -92,7 +92,12 @@ export class DatabaseService
     fn: (
       prisma: Omit<
         PrismaClient,
-        '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+        | '$connect'
+        | '$disconnect'
+        | '$on'
+        | '$transaction'
+        | '$use'
+        | '$extends'
       >,
     ) => Promise<T>,
   ): Promise<T> {
