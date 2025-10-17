@@ -14,6 +14,9 @@ import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { PostModule } from './post/post.module';
+import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -43,8 +46,9 @@ import { PostModule } from './post/post.module';
     DatabaseModule,
     HealthModule,
     PostModule,
+    AuthModule,
   ],
-  controllers: [AppController, UserController],
+  controllers: [AppController, UserController, AuthController],
   providers: [
     AppService,
     {
@@ -55,6 +59,7 @@ import { PostModule } from './post/post.module';
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
     },
+    AuthService,
   ],
 })
 export class AppModule implements NestModule {
