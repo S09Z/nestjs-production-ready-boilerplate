@@ -35,4 +35,6 @@ export class UserResponseDto {
 
   @Exclude()
   password: string;
+    userId: any;
+    username: any;
 }
