@@ -12,7 +12,7 @@ export class BodySizeLimitMiddleware implements NestMiddleware {
 
   constructor(private readonly maxSize?: number) {}
 
-  use(req: Request, res: Response, next: NextFunction) {
+  use(req: Request, _res: Response, next: NextFunction) {
     const limit = this.maxSize || this.defaultLimit;
     let receivedBytes = 0;
 
